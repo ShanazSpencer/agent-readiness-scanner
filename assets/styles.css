@@ -261,6 +261,7 @@ button { font-family: inherit; cursor: pointer; }
 @media (min-width: 768px) { .verdict-headline { font-size: 1.875rem; } }
 
 .verdict-sub { font-size: 1rem; color: var(--ink-soft); line-height: 1.6; margin-top: 16px; }
+.verdict-sub-tail { color: var(--muted); font-size: 0.95em; }
 
 /* ---------- Category cards ---------- */
 .category-grid {

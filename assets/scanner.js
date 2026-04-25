@@ -45,25 +45,58 @@ const CATEGORIES = {
   transaction:     { label: "Transaction",     blurb: "Can they buy?" },
 };
 
-/* ---------- Utility: fetch via proxy with timeout ---------- */
+/* ---------- Utility: fetch via proxy with timeout ----------
+   Returns { ok, status, text, reason } where reason is one of:
+     "ok"            — 2xx response, body in text
+     "http_error"    — 4xx/5xx from upstream (resource doesn't exist / blocked)
+     "rate_limited"  — proxy returned 429
+     "timeout"       — request aborted at timeoutMs
+     "network_error" — fetch threw before getting a response
+   Callers map http_error → fail and the last three → unknown.
+*/
 async function safeFetch(url, timeoutMs = 7000) {
   const ctrl  = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), timeoutMs);
   try {
     const r = await fetch(PROXY + encodeURIComponent(url), { signal: ctrl.signal });
     clearTimeout(timer);
-    if (!r.ok) return { ok: false, status: r.status, text: "" };
-    const text = await r.text();
-    return { ok: true, status: r.status, text };
+    if (r.ok) {
+      const text = await r.text();
+      return { ok: true, status: r.status, text, reason: "ok" };
+    }
+    if (r.status === 429) {
+      return { ok: false, status: r.status, text: "", reason: "rate_limited" };
+    }
+    return { ok: false, status: r.status, text: "", reason: "http_error" };
   } catch (e) {
     clearTimeout(timer);
-    return { ok: false, status: 0, text: "", err: e.message };
+    if (e.name === "AbortError") {
+      return { ok: false, status: 0, text: "", reason: "timeout", err: e.message };
+    }
+    return { ok: false, status: 0, text: "", reason: "network_error", err: e.message };
   }
+}
+
+function isProxyError(reason) {
+  return reason === "rate_limited" || reason === "timeout" || reason === "network_error";
+}
+
+function proxyErrorDetail(reason, what) {
+  const phrase = reason === "rate_limited" ? "proxy rate-limited"
+              : reason === "timeout"        ? "request timed out"
+              :                               "network error reaching proxy";
+  return `Couldn't ${what} — ${phrase}.`;
 }
 
 /* ---------- Individual checks ---------- */
 async function checkRobots(base) {
   const r = await safeFetch(base + "/robots.txt");
+  if (isProxyError(r.reason)) {
+    return {
+      robots: { state: "unknown", detail: proxyErrorDetail(r.reason, "fetch /robots.txt") },
+      bots:   { state: "unknown", detail: "Couldn't read robots.txt to check bot policy." },
+    };
+  }
   const out = {
     robots: { state: "fail", detail: "No robots.txt found." },
     bots:   { state: "fail", detail: "No AI bot policy detected." },
@@ -85,6 +118,9 @@ async function checkRobots(base) {
 
 async function checkLLMSTxt(base) {
   const r = await safeFetch(base + "/llms.txt");
+  if (isProxyError(r.reason)) {
+    return { state: "unknown", detail: proxyErrorDetail(r.reason, "fetch /llms.txt") };
+  }
   if (r.ok && r.text && r.text.trim().length > 20 && !/<html/i.test(r.text)) {
     return { state: "pass", detail: `llms.txt found (${r.text.length} bytes).` };
   }
@@ -93,6 +129,9 @@ async function checkLLMSTxt(base) {
 
 async function checkSitemap(base) {
   const r = await safeFetch(base + "/sitemap.xml");
+  if (isProxyError(r.reason)) {
+    return { state: "unknown", detail: proxyErrorDetail(r.reason, "fetch /sitemap.xml") };
+  }
   if (r.ok && /<urlset|<sitemapindex/i.test(r.text)) {
     const urls = (r.text.match(/<loc>/g) || []).length;
     return { state: "pass", detail: `sitemap.xml found (${urls} entries).` };
@@ -102,6 +141,19 @@ async function checkSitemap(base) {
 
 async function checkHomepage(base) {
   const r = await safeFetch(base + "/");
+  if (isProxyError(r.reason)) {
+    const unk = (label) => ({ state: "unknown", detail: proxyErrorDetail(r.reason, `fetch homepage to check ${label}`) });
+    return {
+      out: {
+        jsonld:     unk("JSON-LD"),
+        ogmeta:     unk("Open Graph"),
+        orgschema:  unk("Organization schema"),
+        productsch: unk("Product schema"),
+        pricing:    unk("pricing markup"),
+      },
+      raw: ""
+    };
+  }
   const out = {
     jsonld:     { state: "fail", detail: "No JSON-LD <script> tags found on homepage." },
     ogmeta:     { state: "fail", detail: "No Open Graph tags detected." },
@@ -140,22 +192,32 @@ async function checkHomepage(base) {
 
 async function checkMCP(base) {
   const candidates = ["/.well-known/mcp", "/.well-known/model-context-protocol", "/mcp", "/api/mcp"];
+  let sawProxyError = false;
   for (const p of candidates) {
     const r = await safeFetch(base + p);
+    if (isProxyError(r.reason)) { sawProxyError = true; continue; }
     if (r.ok && r.text && r.text.length > 0 && !/<html/i.test(r.text.slice(0, 200))) {
       return { state: "pass", detail: `MCP-style endpoint responded at ${p}.` };
     }
+  }
+  if (sawProxyError) {
+    return { state: "unknown", detail: "Couldn't probe MCP endpoints — proxy error on one or more paths." };
   }
   return { state: "fail", detail: "No MCP endpoint detected. Fewer than 1% of UK sites have this — early-mover territory." };
 }
 
 async function checkOpenAPI(base) {
   const candidates = ["/openapi.json", "/swagger.json", "/api/openapi.json", "/.well-known/openapi"];
+  let sawProxyError = false;
   for (const p of candidates) {
     const r = await safeFetch(base + p);
+    if (isProxyError(r.reason)) { sawProxyError = true; continue; }
     if (r.ok && /"openapi"|"swagger"/i.test(r.text)) {
       return { state: "pass", detail: `OpenAPI spec found at ${p}.` };
     }
+  }
+  if (sawProxyError) {
+    return { state: "unknown", detail: "Couldn't probe OpenAPI endpoints — proxy error on one or more paths." };
   }
   return { state: "fail", detail: "No public OpenAPI / Swagger spec detected." };
 }
@@ -163,26 +225,36 @@ async function checkOpenAPI(base) {
 async function checkWellKnown(base) {
   const candidates = ["/.well-known/ai-plugin.json", "/.well-known/api-catalog", "/.well-known/agent"];
   const hits = [];
+  let sawProxyError = false;
   for (const p of candidates) {
     const r = await safeFetch(base + p);
+    if (isProxyError(r.reason)) { sawProxyError = true; continue; }
     if (r.ok && r.text && r.text.length > 5 && !/<html/i.test(r.text.slice(0, 200))) {
       hits.push(p);
     }
   }
   if (hits.length >= 2) return { state: "pass", detail: `${hits.length} .well-known surfaces responding (${hits.join(", ")}).` };
   if (hits.length === 1) return { state: "warn", detail: `Only 1 .well-known endpoint detected (${hits[0]}). Add the others.` };
+  if (sawProxyError) {
+    return { state: "unknown", detail: "Couldn't probe .well-known endpoints — proxy error on one or more paths." };
+  }
   return { state: "fail", detail: "No .well-known discovery surfaces exposed." };
 }
 
 async function checkProductFeed(base) {
   const candidates = ["/products.json", "/feed", "/feed.xml", "/rss", "/products.xml"];
+  let sawProxyError = false;
   for (const p of candidates) {
     const r = await safeFetch(base + p);
+    if (isProxyError(r.reason)) { sawProxyError = true; continue; }
     if (r.ok && r.text && r.text.length > 100) {
       if (/<\?xml|<rss|"products"\s*:|<feed/i.test(r.text)) {
         return { state: "pass", detail: `Structured feed detected at ${p}.` };
       }
     }
+  }
+  if (sawProxyError) {
+    return { state: "unknown", detail: "Couldn't probe feed endpoints — proxy error on one or more paths." };
   }
   return { state: "fail", detail: "No product / services feed detected." };
 }
@@ -192,6 +264,9 @@ async function checkOAuth(base) {
   const r2 = await safeFetch(base + "/.well-known/openid-configuration");
   if ((r1.ok && /"issuer"/i.test(r1.text)) || (r2.ok && /"issuer"/i.test(r2.text))) {
     return { state: "pass", detail: "OAuth / OpenID discovery endpoint present — agents can authenticate." };
+  }
+  if (isProxyError(r1.reason) && isProxyError(r2.reason)) {
+    return { state: "unknown", detail: "Couldn't probe OAuth discovery endpoints — proxy error on both paths." };
   }
   return { state: "fail", detail: "No OAuth discovery endpoint. ACP / agent auth not yet wired." };
 }
@@ -260,38 +335,86 @@ async function runScan(url) {
 
 /* ---------- Scoring + render ---------- */
 function scoreAndRender(results) {
-  const catTotals = { discoverability: 0, structured: 0, access: 0, transaction: 0 };
-  const catMax    = { discoverability: 0, structured: 0, access: 0, transaction: 0 };
+  const catTotals       = { discoverability: 0, structured: 0, access: 0, transaction: 0 };
+  const catMax          = { discoverability: 0, structured: 0, access: 0, transaction: 0 };
+  const catVerified     = { discoverability: 0, structured: 0, access: 0, transaction: 0 };
+  const catTotalChecks  = { discoverability: 0, structured: 0, access: 0, transaction: 0 };
+  let unknownCount = 0;
 
   CHECKS.forEach(c => {
-    catMax[c.cat] += c.weight;
+    catTotalChecks[c.cat]++;
     const r = results[c.id];
     if (!r) return;
+    if (r.state === "unknown") {
+      unknownCount++;
+      return; // exclude from BOTH totals and max
+    }
+    catVerified[c.cat]++;
+    catMax[c.cat] += c.weight;
     if (r.state === "pass")      catTotals[c.cat] += c.weight;
     else if (r.state === "warn") catTotals[c.cat] += c.weight * 0.5;
   });
 
-  const totalGot = Object.values(catTotals).reduce((a, b) => a + b, 0);
-  const totalMax = Object.values(catMax).reduce((a, b) => a + b, 0);
-  const overall  = Math.round((totalGot / totalMax) * 100);
+  const totalGot   = Object.values(catTotals).reduce((a, b) => a + b, 0);
+  const totalMax   = Object.values(catMax).reduce((a, b) => a + b, 0);
+  const scoreFloor = unknownCount > 7 || totalMax === 0;
+  const overall    = scoreFloor ? null : Math.round((totalGot / totalMax) * 100);
 
-  // Overall score
-  animateNumber("overallScore", overall);
-  const verdict = verdictFor(overall);
+  // Overall score number
+  const scoreEl = document.getElementById("overallScore");
+  const denomEl = document.querySelector(".score-denom");
+  if (scoreFloor) {
+    scoreEl.textContent = "—";
+    if (denomEl) denomEl.classList.add("hidden");
+  } else {
+    if (denomEl) denomEl.classList.remove("hidden");
+    animateNumber("overallScore", overall);
+  }
+
+  // Verdict
+  const verdict = scoreFloor
+    ? verdictInconclusive(unknownCount)
+    : verdictFor(overall);
   const badge = document.getElementById("verdictBadge");
-  badge.textContent = verdict.badge;
+  badge.textContent      = verdict.badge;
   badge.style.background = verdict.bg;
-  badge.style.color = verdict.fg;
+  badge.style.color      = verdict.fg;
   document.getElementById("verdictText").textContent = verdict.headline;
-  document.getElementById("verdictSub").textContent  = verdict.sub;
+
+  const subEl = document.getElementById("verdictSub");
+  let subHtml = verdict.sub;
+  if (!scoreFloor && unknownCount > 0) {
+    const tail = unknownCount === 1
+      ? "1 check was inconclusive and excluded."
+      : `${unknownCount} checks were inconclusive and excluded.`;
+    subHtml += `<br><br><span class="verdict-sub-tail">${tail}</span>`;
+  }
+  subEl.innerHTML = subHtml;
 
   // Category cards
   const grid = document.getElementById("categoryGrid");
   grid.innerHTML = "";
   Object.entries(CATEGORIES).forEach(([key, meta], idx) => {
-    const pct  = Math.round(catTotals[key] / catMax[key] * 100);
-    const circ = 2 * Math.PI * 34;
-    const off  = circ * (1 - pct / 100);
+    const verified     = catVerified[key];
+    const totalInCat   = catTotalChecks[key];
+    const unknownInCat = totalInCat - verified;
+    const catFloor     = verified < 2;
+    const pct          = catMax[key] === 0 ? 0 : Math.round(catTotals[key] / catMax[key] * 100);
+    const circ         = 2 * Math.PI * 34;
+    const off          = catFloor ? circ : circ * (1 - pct / 100);
+
+    const ringNumber = catFloor
+      ? `<text x="40" y="46" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="20" font-weight="700" fill="var(--muted)">—</text>`
+      : `<text x="40" y="46" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="16" font-weight="700" fill="var(--cyan-deep)">${pct}</text>`;
+
+    const metaLine = catFloor
+      ? `<div class="cat-card-meta"><span style="color: var(--muted); font-style: italic;">Inconclusive — ${unknownInCat} of ${totalInCat} couldn't be verified</span></div>`
+      : `<div class="cat-card-meta">
+          <span>${catTotals[key].toFixed(0)} / ${catMax[key]} pts${unknownInCat > 0 ? ` <span style="color:var(--muted);">(${unknownInCat} excluded)</span>` : ""}</span>
+          <span style="color: ${pct >= 60 ? 'var(--emerald)' : pct >= 30 ? 'var(--amber)' : 'var(--ruby)'}; font-weight:600;">
+            ${pct >= 60 ? 'Strong' : pct >= 30 ? 'Partial' : 'Weak'}
+          </span>
+         </div>`;
 
     const card = document.createElement("div");
     card.className = "cat-card reveal";
@@ -308,19 +431,12 @@ function scoreAndRender(results) {
           <circle cx="40" cy="40" r="34" class="ring-fg" fill="none" stroke-width="6" stroke-linecap="round"
                   stroke-dasharray="${circ}" stroke-dashoffset="${circ}"
                   transform="rotate(-90 40 40)" />
-          <text x="40" y="46" text-anchor="middle" font-family="JetBrains Mono, monospace"
-                font-size="16" font-weight="700" fill="var(--cyan-deep)">${pct}</text>
+          ${ringNumber}
         </svg>
       </div>
-      <div class="cat-card-meta">
-        <span>${catTotals[key].toFixed(0)} / ${catMax[key]} pts</span>
-        <span style="color: ${pct >= 60 ? 'var(--emerald)' : pct >= 30 ? 'var(--amber)' : 'var(--ruby)'}; font-weight:600;">
-          ${pct >= 60 ? 'Strong' : pct >= 30 ? 'Partial' : 'Weak'}
-        </span>
-      </div>
+      ${metaLine}
     `;
     grid.appendChild(card);
-    // Animate ring after the card is in the DOM
     requestAnimationFrame(() => {
       card.querySelector(".ring-fg").style.strokeDashoffset = off;
     });
@@ -339,9 +455,12 @@ function scoreAndRender(results) {
       const r = results[c.id] || { state: "unknown", detail: "Check did not run." };
       const row = document.createElement("div");
       row.className = "check-row";
-      const pts = r.state === "pass" ? c.weight
-                : r.state === "warn" ? (c.weight * 0.5).toFixed(1)
-                : 0;
+
+      const ptsHtml = r.state === "pass"    ? `${c.weight} / ${c.weight} pts`
+                    : r.state === "warn"    ? `${(c.weight * 0.5).toFixed(1)} / ${c.weight} pts`
+                    : r.state === "unknown" ? `— / ${c.weight} pts <span style="opacity:.7;">(excluded)</span>`
+                    :                         `0 / ${c.weight} pts`;
+
       row.innerHTML = `
         <span class="check-dot dot-${r.state}"></span>
         <div>
@@ -351,7 +470,7 @@ function scoreAndRender(results) {
         </div>
         <div>
           <div class="check-state" style="color: ${stateColor(r.state)};">${stateLabel(r.state)}</div>
-          <div class="check-points">${pts} / ${c.weight} pts</div>
+          <div class="check-points">${ptsHtml}</div>
         </div>
       `;
       list.appendChild(row);
@@ -386,6 +505,15 @@ function verdictFor(score) {
     bg: "#fecaca", fg: "#991b1b",
     headline: "Right now, to an agent, you essentially don't exist.",
     sub: "That's not a failing — it's where ~70% of UK SMEs are. The upside is quick wins are genuinely quick. Start with the red rows below."
+  };
+}
+
+function verdictInconclusive(unknownCount) {
+  return {
+    badge: "Inconclusive",
+    bg: "#f1f5f9", fg: "#475569",
+    headline: "We couldn't reach enough of your site to score reliably.",
+    sub: `${unknownCount} of ${CHECKS.length} checks were inconclusive — the proxy was rate-limited or your site timed out. Try again in a minute. If the same checks keep failing, your site may have aggressive bot protection that also blocks AI agents — which is itself an agent-readiness problem worth fixing.`
   };
 }
 
