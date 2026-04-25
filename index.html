@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Agent Readiness Scanner — by AEO-REX</title>
+  <meta name="description" content="Find out if AI agents can actually find, read and buy from your business. 14 signals. Real checks. Free in 60 seconds." />
+  <meta property="og:title" content="Agent Readiness Scanner — by AEO-REX" />
+  <meta property="og:description" content="Can an AI agent find, read and buy from your business? Free diagnostic from the UK's first AEO consultancy." />
+  <meta property="og:type" content="website" />
+  <meta name="robots" content="index,follow" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body>
+
+  <!-- ============================ HEADER ============================ -->
+  <header class="site-header">
+    <div class="container nav">
+      <a href="#" class="brand">
+        <span class="brand-glyph"></span>
+        <span class="brand-name">agent<span class="brand-dot">·</span>ready</span>
+        <span class="brand-tag">by AEO-REX</span>
+      </a>
+      <nav class="nav-links">
+        <a href="#how" class="link">How it works</a>
+        <a href="#pricing" class="link">Audit</a>
+        <a href="https://aeo-rex.com" class="link">aeo-rex.com →</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ============================ HERO ============================ -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-grid">
+        <div class="hero-copy">
+          <div class="kicker">Scanner · v1 · April 2026</div>
+          <h1 class="hero-headline">
+            Can an AI agent <em>actually</em> find, read and buy from your business?
+          </h1>
+          <p class="hero-sub">
+            Being mentioned by ChatGPT is yesterday's game. The next wave is agents <strong>acting</strong> — booking, buying, comparing — without a human ever visiting your site. We scan 14 signals across four categories and give you an honest score in 60 seconds.
+          </p>
+        </div>
+
+        <aside class="hero-stats">
+          <div class="stat-row"><span>Average score</span><span class="stat-val">28 / 100</span></div>
+          <div class="stat-row"><span>Agent-ready sites</span><span class="stat-val">4%</span></div>
+          <div class="stat-row"><span>MCP-enabled</span><span class="stat-val">&lt; 1%</span></div>
+          <div class="stat-row last"><span>llms.txt present</span><span class="stat-val">3%</span></div>
+        </aside>
+      </div>
+
+      <!-- URL input card -->
+      <div class="scan-card">
+        <form id="scanForm" class="scan-form">
+          <div class="url-input-wrap">
+            <div class="url-prefix">https://</div>
+            <input id="urlInput" type="text" placeholder="yourbusiness.co.uk" autocomplete="url" spellcheck="false" />
+          </div>
+          <button type="submit" id="scanBtn" class="btn-primary">
+            Run free scan &nbsp;→
+          </button>
+        </form>
+        <div class="scan-meta">
+          <span>⌁ No signup</span>
+          <span>⌁ 14 real checks</span>
+          <span>⌁ ~60 seconds</span>
+          <span class="md-only">⌁ From the UK's first AEO consultancy</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ LIVE SCAN ============================ -->
+  <section id="scanSection" class="scan-live hidden">
+    <div class="container">
+      <div class="scan-panel">
+        <div class="scan-panel-head">
+          <div class="scan-status">
+            <span class="pulse-dot"></span>
+            <span class="mono-label">Scanning <span id="scanTarget" class="target-url"></span></span>
+          </div>
+          <span id="scanProgress" class="scan-progress">0 / 14</span>
+        </div>
+        <div class="scan-sweep-wrap"><div class="scan-sweep"></div></div>
+        <div id="scanLog" class="scan-log"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ RESULTS ============================ -->
+  <section id="resultsSection" class="results hidden">
+    <div class="container">
+
+      <div class="overall-grid">
+        <div class="overall-score reveal">
+          <div class="kicker">Overall readiness</div>
+          <div class="score-display">
+            <span id="overallScore" class="score-num">0</span>
+            <span class="score-denom">/ 100</span>
+          </div>
+          <div id="verdictBadge" class="verdict-badge"></div>
+        </div>
+        <div class="overall-verdict reveal delay-1">
+          <div class="kicker">What this means</div>
+          <p id="verdictText" class="verdict-headline"></p>
+          <p id="verdictSub" class="verdict-sub"></p>
+        </div>
+      </div>
+
+      <div id="categoryGrid" class="category-grid"></div>
+
+      <div class="checks-panel reveal delay-3">
+        <div class="checks-head">
+          <div class="kicker">Check-by-check breakdown</div>
+          <div class="checks-title">What an agent sees when it looks at you</div>
+        </div>
+        <div id="checksList"></div>
+      </div>
+
+      <div id="pricing" class="cta-panel reveal delay-4">
+        <div class="cta-grid">
+          <div class="cta-copy">
+            <div class="kicker cta-kicker">Next step</div>
+            <h3 class="cta-headline">Want the fix list?</h3>
+            <p class="cta-sub">
+              The free scanner tells you <em>what's</em> broken. The paid audit tells you <em>exactly</em> how to fix it — MCP endpoint scaffolding, schema templates, robots.txt policy, structured pricing feeds, and a 90-day Agent Readiness roadmap written for your stack.
+            </p>
+            <ul class="cta-list">
+              <li><span>→</span> Line-by-line fix doc for all 14 signals</li>
+              <li><span>→</span> Copy-paste schema + llms.txt + robots.txt templates</li>
+              <li><span>→</span> MCP server starter for your CMS (WP, Shopify, custom)</li>
+              <li><span>→</span> 30-min strategy call with Shanaz</li>
+            </ul>
+          </div>
+          <div class="cta-card">
+            <div class="cta-price-wrap">
+              <span class="cta-price">£497</span>
+              <span class="cta-price-note">one-off</span>
+            </div>
+            <div class="cta-price-label">Agent Readiness Audit</div>
+            <a href="mailto:hello@aeo-rex.com?subject=Agent Readiness Audit" class="cta-btn">Book audit — £497</a>
+            <p class="cta-fineprint">Delivered in 5 working days · UK VAT included</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ HOW IT WORKS ============================ -->
+  <section id="how" class="how">
+    <div class="container">
+      <div class="how-grid">
+        <div class="how-intro">
+          <div class="kicker">How the scan works</div>
+          <h2 class="how-headline">Four layers.<br/>Fourteen signals.<br/>One honest score.</h2>
+        </div>
+        <div class="how-steps">
+          <div class="how-step">
+            <span class="how-num">01 ·</span>
+            <div>
+              <div class="how-step-title">Discoverability</div>
+              <div class="how-step-sub">Can an agent even find you? robots.txt policy for GPTBot / ClaudeBot / PerplexityBot, llms.txt, sitemap, canonical signals.</div>
+            </div>
+          </div>
+          <div class="how-step">
+            <span class="how-num">02 ·</span>
+            <div>
+              <div class="how-step-title">Structured data</div>
+              <div class="how-step-sub">Can it read you without guessing? JSON-LD schema.org, Organization / LocalBusiness / Product markup, Open Graph, entity consistency.</div>
+            </div>
+          </div>
+          <div class="how-step">
+            <span class="how-num">03 ·</span>
+            <div>
+              <div class="how-step-title">Agent access</div>
+              <div class="how-step-sub">Can it query you directly? MCP server endpoint, /.well-known/ surfaces, OpenAPI / Swagger presence, OAuth for agents.</div>
+            </div>
+          </div>
+          <div class="how-step last">
+            <span class="how-num">04 ·</span>
+            <div>
+              <div class="how-step-title">Transaction readiness</div>
+              <div class="how-step-sub">Can it actually buy? Machine-readable pricing, product feeds, ACP / agentic checkout hooks, availability signals.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ FAQ ============================ -->
+  <section class="faq">
+    <div class="container-narrow">
+      <div class="kicker">Honest questions</div>
+      <h2 class="faq-headline">Things people usually ask.</h2>
+
+      <details class="faq-item">
+        <summary>
+          <span>Is this the same as SEO or AEO?</span>
+          <span class="chev">›</span>
+        </summary>
+        <div class="faq-body">
+          No. SEO gets humans to your site via Google. AEO (what AEO-REX does) gets you mentioned when humans ask ChatGPT. Agent Readiness is about agents <em>acting</em> — booking, buying, comparing — without a human loading your page at all. Different surface, different signals, different stack.
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary>
+          <span>Does this actually fetch my site?</span>
+          <span class="chev">›</span>
+        </summary>
+        <div class="faq-body">
+          Yes. The scanner pulls your robots.txt, sitemap, llms.txt, homepage HTML, and probes common agent / API endpoints via a public proxy. Some sites block automated fetches — in that case we mark the check "unknown" rather than failing you unfairly. It's a diagnostic, not a verdict.
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary>
+          <span>Why does "agent readiness" matter today?</span>
+          <span class="chev">›</span>
+        </summary>
+        <div class="faq-body">
+          Honestly? Most SMEs don't need this <em>yet</em>. But OpenAI's Agentic Commerce Protocol shipped with Stripe, Perplexity Shopping is live, and Google, Anthropic and Shopify are all pushing agent-driven purchase flows. The businesses that quietly get ready in 2026 will dominate the category in 2027.
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary>
+          <span>What score should I aim for?</span>
+          <span class="chev">›</span>
+        </summary>
+        <div class="faq-body">
+          60+ puts you ahead of 95% of UK SME sites right now. 80+ means you're genuinely agent-native. Anything under 30 is where most businesses start — don't panic, just fix it before your competitors do.
+        </div>
+      </details>
+      <details class="faq-item last">
+        <summary>
+          <span>Who's behind this?</span>
+          <span class="chev">›</span>
+        </summary>
+        <div class="faq-body">
+          AEO-REX — UK-based AEO consultancy, featured at Oxford Saïd Business School and on Islam Channel, founded by Shanaz Begum in Birmingham. We built this scanner because no-one else was honest about what "agent readiness" actually requires. <a href="https://aeo-rex.com" class="link">aeo-rex.com →</a>
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <!-- ============================ FOOTER ============================ -->
+  <footer class="site-footer">
+    <div class="container foot">
+      <div class="brand foot-brand">
+        <span class="brand-glyph"></span>
+        <span class="brand-name">agent<span class="brand-dot">·</span>ready</span>
+        <span class="brand-tag">/ a sub-product of AEO-REX</span>
+      </div>
+      <div class="foot-links">
+        <a href="https://aeo-rex.com" class="link">aeo-rex.com</a>
+        <a href="mailto:hello@aeo-rex.com" class="link">hello@aeo-rex.com</a>
+        <span>© 2026</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/scanner.js"></script>
+</body>
+</html>
