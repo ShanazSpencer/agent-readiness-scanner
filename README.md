@@ -1,8 +1,10 @@
-# Agent Readiness Scanner
+# AGENTREX — Agent Readiness Scanner
 
-> The UK's first free diagnostic for AI-agent readiness. Built by [AEO-REX](https://aeo-rex.com).
+> Free agent readiness diagnostic. Built by [AEO-REX](https://aeo-rex.com), the UK's first AEO consultancy.
 
-Getting cited by ChatGPT is yesterday's game. The next wave is agents _acting_ on behalf of humans — booking, buying, comparing — without a human ever visiting your site. This scanner tells you, honestly, whether your business is on the map or invisible to them.
+_AGENTREX is a sub-product of AEO-REX. Will live at [agentrex.aeo-rex.com](https://agentrex.aeo-rex.com) once DNS is wired up._
+
+Getting cited by ChatGPT is yesterday's game. The next wave is agents _acting_ on behalf of humans — booking, buying, comparing — without a human ever visiting your site. Agentrex tells you, honestly, whether your business is on the map or invisible to them.
 
 **14 real checks · 4 categories · 60 seconds · No signup.**
 
@@ -91,7 +93,7 @@ The heavy weights sit on MCP (12 pts), JSON-LD (10 pts), machine-readable pricin
 
 ## Limitations (being honest)
 
-- Browser-side scanning is fragile. Sites behind Cloudflare Bot Management or aggressive anti-bot protection return empty, and the scanner marks those checks as `fail` even when we genuinely can't tell.
+- Browser-side scanning is fragile. Sites behind Cloudflare Bot Management or aggressive anti-bot protection return empty, and Agentrex marks those checks as `fail` even when we genuinely can't tell.
 - JavaScript-rendered sites (SPAs) won't show their structured data because we read raw HTML, not the rendered DOM. v2 will fix this with a headless-browser fetcher.
 - The public CORS proxy is rate-limited.
 - This is a _diagnostic_, not a definitive audit. For the line-by-line fix list with implementation templates, book the [AEO-REX Agent Readiness Audit](https://aeo-rex.com).
@@ -108,7 +110,7 @@ The heavy weights sit on MCP (12 pts), JSON-LD (10 pts), machine-readable pricin
 
 ## Why this exists
 
-AI agents will quietly become the default purchase-decision layer in 2027. The businesses that are machine-readable _before_ that shift will own the category defaults for years. Everyone else will be invisible. We built this scanner because the alternative was letting another generation of SMEs get lapped by anyone who bothered to ship `llms.txt` and a product feed.
+AI agents will quietly become the default purchase-decision layer in 2027. The businesses that are machine-readable _before_ that shift will own the category defaults for years. Everyone else will be invisible. We built Agentrex because the alternative was letting another generation of SMEs get lapped by anyone who bothered to ship `llms.txt` and a product feed.
 
 ## License
 
