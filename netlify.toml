@@ -1,0 +1,9 @@
+# Netlify config for the Agent Readiness Scanner.
+# Static site at the repo root + one serverless function.
+
+[build]
+  publish = "."
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
