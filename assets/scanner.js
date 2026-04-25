@@ -48,11 +48,18 @@ const CATEGORIES = {
 /* ---------- Utility: fetch via proxy with timeout ----------
    Returns { ok, status, text, reason } where reason is one of:
      "ok"            — 2xx response, body in text
-     "http_error"    — 4xx/5xx from upstream (resource doesn't exist / blocked)
+     "http_error"    — 4xx/5xx from upstream (resource doesn't exist)
      "rate_limited"  — proxy returned 429
+     "proxy_blocked" — proxy returned 403 (refused our request)
      "timeout"       — request aborted at timeoutMs
      "network_error" — fetch threw before getting a response
-   Callers map http_error → fail and the last three → unknown.
+   Callers map http_error → fail and the rest → unknown.
+
+   NOTE: while we're on the public corsproxy.io we treat ALL 403s as
+   proxy refusal, because we can't tell proxy-403 from upstream-403
+   over the wire. Once we run our own Netlify Function proxy, upstream
+   403s become distinguishable and should be re-classified as fail
+   (CDN bot blockers ARE an agent-readiness fail).
 */
 async function safeFetch(url, timeoutMs = 7000) {
   const ctrl  = new AbortController();
@@ -67,6 +74,9 @@ async function safeFetch(url, timeoutMs = 7000) {
     if (r.status === 429) {
       return { ok: false, status: r.status, text: "", reason: "rate_limited" };
     }
+    if (r.status === 403) {
+      return { ok: false, status: r.status, text: "", reason: "proxy_blocked" };
+    }
     return { ok: false, status: r.status, text: "", reason: "http_error" };
   } catch (e) {
     clearTimeout(timer);
@@ -78,11 +88,15 @@ async function safeFetch(url, timeoutMs = 7000) {
 }
 
 function isProxyError(reason) {
-  return reason === "rate_limited" || reason === "timeout" || reason === "network_error";
+  return reason === "rate_limited"
+      || reason === "proxy_blocked"
+      || reason === "timeout"
+      || reason === "network_error";
 }
 
 function proxyErrorDetail(reason, what) {
-  const phrase = reason === "rate_limited" ? "proxy rate-limited"
+  const phrase = reason === "rate_limited"  ? "proxy rate-limited"
+              : reason === "proxy_blocked"  ? "proxy refused (HTTP 403)"
               : reason === "timeout"        ? "request timed out"
               :                               "network error reaching proxy";
   return `Couldn't ${what} — ${phrase}.`;
@@ -513,7 +527,7 @@ function verdictInconclusive(unknownCount) {
     badge: "Inconclusive",
     bg: "#f1f5f9", fg: "#475569",
     headline: "We couldn't reach enough of your site to score reliably.",
-    sub: `${unknownCount} of ${CHECKS.length} checks were inconclusive — the proxy was rate-limited or your site timed out. Try again in a minute. If the same checks keep failing, your site may have aggressive bot protection that also blocks AI agents — which is itself an agent-readiness problem worth fixing.`
+    sub: `${unknownCount} of ${CHECKS.length} checks were inconclusive — the proxy refused, was rate-limited, or your site timed out. Try again in a minute. If the same checks keep failing, your site may have aggressive bot protection that also blocks AI agents — which is itself an agent-readiness problem worth fixing.`
   };
 }
 
