@@ -19,7 +19,7 @@ Each check returns **pass**, **partial**, or **fail** with a concrete explanatio
 
 ## Live demo
 
-→ [agents.aeo-rex.com](https://agents.aeo-rex.com) _(coming soon)_
+→ Live at [peppy-alpaca-efe75b.netlify.app](https://peppy-alpaca-efe75b.netlify.app) — moving to [agents.aeo-rex.com](https://agents.aeo-rex.com) once DNS is wired up.
 
 ## Running locally
 
