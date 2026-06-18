@@ -127,10 +127,12 @@ button { font-family: inherit; cursor: pointer; }
 }
 
 .hero-sub {
-  font-size: 1.1rem; max-width: 640px; color: var(--ink-soft);
-  line-height: 1.6; margin: 0;
+  font-size: clamp(20px, 2.1vw, 26px);
+  line-height: 1.55;
+  max-width: 720px;
+  color: var(--ink-soft);
+  margin: 0;
 }
-@media (min-width: 768px) { .hero-sub { font-size: 1.2rem; } }
 .hero-sub strong { color: var(--ink); font-weight: 600; }
 
 .hero-stats {
@@ -189,16 +191,19 @@ button { font-family: inherit; cursor: pointer; }
 }
 
 .btn-primary {
-  background: var(--ink); color: #fff;
-  border: 0; border-radius: 8px;
-  padding: 14px 26px; font-size: 15px; font-weight: 600;
-  white-space: nowrap;
-  transition: transform .08s ease, box-shadow .15s ease;
-  box-shadow: 4px 4px 0 var(--cyan);
+  background: #f97316; color: #0a0e1a;
+  border: 0; border-radius: 999px;
+  padding: 18px 32px; font-size: 18px; font-weight: 800;
+  white-space: nowrap; text-decoration: none;
+  transition: transform .15s ease, background .2s ease, box-shadow .25s ease;
+  box-shadow: 0 8px 24px rgba(249, 115, 22, 0.35);
 }
-.btn-primary:hover { transform: translate(-1px, -1px); box-shadow: 6px 6px 0 var(--cyan); }
-.btn-primary:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--cyan); }
-.btn-primary:disabled { opacity: .6; cursor: not-allowed; transform: none; box-shadow: 4px 4px 0 var(--cyan); }
+.btn-primary:hover {
+  background: #fb923c; transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(249, 115, 22, 0.45);
+}
+.btn-primary:active { transform: translateY(0); box-shadow: 0 6px 18px rgba(249, 115, 22, 0.40); }
+.btn-primary:disabled { opacity: .55; cursor: not-allowed; transform: none; box-shadow: 0 8px 24px rgba(249, 115, 22, 0.20); }
 
 .scan-meta {
   display: flex; flex-wrap: wrap; gap: 16px;
@@ -398,14 +403,15 @@ button { font-family: inherit; cursor: pointer; }
 }
 .cta-btn {
   display: block; text-align: center; margin-top: 24px;
-  padding: 14px 20px; border-radius: 8px;
-  background: var(--cyan); color: var(--bg);
-  font-weight: 700; font-size: 15px;
-  transition: transform .08s ease, background .15s ease;
+  padding: 18px 32px; border-radius: 999px;
+  background: #f97316; color: #0a0e1a;
+  font-weight: 800; font-size: 18px;
+  transition: transform .15s ease, background .2s ease, box-shadow .25s ease;
+  box-shadow: 0 8px 24px rgba(249, 115, 22, 0.35);
 }
 .cta-btn:hover {
-  background: var(--cyan); transform: translateY(-1px);
-  box-shadow: 0 8px 24px var(--cyan-glow);
+  background: #fb923c; transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(249, 115, 22, 0.45);
 }
 .cta-fineprint {
   text-align: center; margin-top: 12px;
