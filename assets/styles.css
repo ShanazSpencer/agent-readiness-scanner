@@ -1,31 +1,34 @@
 /* =====================================================
    Agent Readiness Scanner — Styles
-   Palette matched to AEO-REX (cyan / sky primary)
+   Theme: aeo-rex.com homepage parity (dark navy + electric cyan)
    ===================================================== */
 
 :root {
-  /* Core palette — AEO-REX cyan */
-  --cyan:          #0891b2;   /* cyan-600 — primary */
-  --cyan-bright:   #06b6d4;   /* cyan-500 — accent */
-  --cyan-soft:     #cffafe;   /* cyan-100 — tints */
-  --cyan-deep:     #083344;   /* cyan-950 — headings */
+  /* Core palette — aeo-rex.com dark theme */
+  --cyan:          #00e5ff;                    /* electric cyan, aeo-rex.com primary */
+  --cyan-bright:   #00e5ff;                    /* aligned with --cyan in dark theme */
+  --cyan-soft:     rgba(0, 229, 255, 0.12);    /* aeo-rex.com --cyan-dim */
+  --cyan-deep:     #00e5ff;                    /* in dark theme cyan IS the highlight */
+  --cyan-glow:     rgba(0, 229, 255, 0.35);    /* aeo-rex.com --cyan-glow */
 
-  /* Neutrals */
-  --ink:           #0f172a;   /* slate-900 */
-  --ink-soft:      #334155;   /* slate-700 */
-  --muted:         #64748b;   /* slate-500 */
-  --line:          #e2e8f0;   /* slate-200 */
-  --bg:            #ffffff;
-  --bg-soft:       #f8fafc;   /* slate-50 */
-  --bg-warm:       #f1f5f9;   /* slate-100 */
+  /* Neutrals (dark theme) */
+  --ink:           #e8e8ec;                    /* aeo-rex.com --text */
+  --ink-soft:      #b8c1d1;                    /* mid-tone body, off-white */
+  --muted:         #7a7a8e;                    /* aeo-rex.com --muted */
+  --line:          rgba(0, 229, 255, 0.10);    /* aeo-rex.com --card-border */
+  --bg:            #0a0e1a;                    /* aeo-rex.com --bg */
+  --bg-soft:       #111827;                    /* aeo-rex.com --card */
+  --bg-warm:       #0f1320;                    /* slightly elevated card */
 
-  /* Semantic */
-  --emerald:       #059669;
-  --amber:         #d97706;
-  --ruby:          #dc2626;
+  /* Semantic (aeo-rex.com aligned) */
+  --emerald:       #22c55e;                    /* aeo-rex.com --success */
+  --amber:         #f59e0b;                    /* aeo-rex.com --warning */
+  --ruby:          #e94560;                    /* aeo-rex.com --red */
 
-  /* Typography */
-  --font-sans:     "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  /* Typography — aeo-rex.com font stack */
+  --font-display:  "Bebas Neue", "DM Sans", -apple-system, sans-serif;
+  --font-italic:   "DM Serif Display", Georgia, serif;
+  --font-sans:     "DM Sans", "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-mono:     "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
@@ -94,8 +97,9 @@ button { font-family: inherit; cursor: pointer; }
 @media (min-width: 768px) { .nav-links { display: flex; } }
 
 /* ---------- Hero ---------- */
-.hero { padding: 64px 0 40px; }
-@media (min-width: 768px) { .hero { padding: 96px 0 64px; } }
+.hero { padding: 96px 0 56px; }
+@media (min-width: 768px) { .hero { padding: 128px 0 80px; } }
+@media (min-width: 1024px) { .hero { padding: 144px 0 96px; } }
 
 .hero-grid {
   display: grid; grid-template-columns: 1fr; gap: 40px; align-items: end;
@@ -105,13 +109,22 @@ button { font-family: inherit; cursor: pointer; }
 }
 
 .hero-headline {
-  font-size: 2.5rem; line-height: 1.05; letter-spacing: -0.02em;
-  font-weight: 800; margin: 20px 0 24px;
+  font-family: var(--font-display);
+  font-size: clamp(2.8rem, 7vw, 5.5rem);
+  line-height: 0.95;
+  letter-spacing: 0.005em;
+  font-weight: 400;                            /* Bebas Neue is single-weight */
+  margin: 24px 0 28px;
   color: var(--ink);
 }
-@media (min-width: 640px)  { .hero-headline { font-size: 3.25rem; } }
-@media (min-width: 1024px) { .hero-headline { font-size: 4rem; line-height: 1; } }
-.hero-headline em { font-style: italic; font-weight: 700; color: var(--cyan); }
+@media (min-width: 1024px) { .hero-headline { line-height: 0.92; } }
+.hero-headline em {
+  font-family: var(--font-italic);
+  font-style: italic;
+  font-weight: 400;
+  color: var(--cyan);
+  font-size: 0.72em;                           /* DM Serif Display reads larger at same size than Bebas */
+}
 
 .hero-sub {
   font-size: 1.1rem; max-width: 640px; color: var(--ink-soft);
@@ -142,9 +155,9 @@ button { font-family: inherit; cursor: pointer; }
   border-radius: 12px;
   padding: 14px;
   box-shadow:
-    0 1px 0 #fff inset,
-    0 10px 30px -12px rgba(8, 51, 68, 0.12),
-    8px 8px 0 rgba(8, 145, 178, 0.08);
+    0 1px 0 rgba(0, 229, 255, 0.04) inset,
+    0 10px 30px -12px rgba(0, 0, 0, 0.12),
+    8px 8px 0 rgba(0, 229, 255, 0.08);
 }
 @media (min-width: 768px) { .scan-card { padding: 16px; } }
 
@@ -161,7 +174,7 @@ button { font-family: inherit; cursor: pointer; }
 }
 .url-input-wrap:focus-within {
   border-color: var(--cyan);
-  box-shadow: 0 0 0 4px rgba(8, 145, 178, 0.10);
+  box-shadow: 0 0 0 4px rgba(0, 229, 255, 0.10);
 }
 .url-prefix {
   padding: 0 16px; display: flex; align-items: center;
@@ -198,7 +211,7 @@ button { font-family: inherit; cursor: pointer; }
 .scan-panel {
   background: var(--bg); border: 1px solid var(--line);
   border-radius: 12px; overflow: hidden;
-  box-shadow: 0 1px 0 #fff inset, 8px 8px 0 rgba(8, 145, 178, 0.08);
+  box-shadow: 0 1px 0 rgba(0, 229, 255, 0.04) inset, 8px 8px 0 rgba(0, 229, 255, 0.08);
 }
 .scan-panel-head {
   display: flex; align-items: center; justify-content: space-between;
@@ -216,7 +229,7 @@ button { font-family: inherit; cursor: pointer; }
 .scan-sweep-wrap { position: relative; height: 4px; background: var(--bg-warm); overflow: hidden; }
 .scan-sweep {
   position: absolute; inset: 0;
-  background: linear-gradient(90deg, transparent, rgba(8, 145, 178, 0.4), transparent);
+  background: linear-gradient(90deg, transparent, rgba(0, 229, 255, 0.4), transparent);
   animation: sweep 1.6s linear infinite;
 }
 
@@ -276,7 +289,7 @@ button { font-family: inherit; cursor: pointer; }
 }
 .cat-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px -4px rgba(8, 51, 68, 0.08);
+  box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.08);
   border-color: var(--cyan-soft);
 }
 .cat-card-head { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 16px; }
@@ -292,7 +305,7 @@ button { font-family: inherit; cursor: pointer; }
 .checks-panel {
   background: var(--bg); border: 1px solid var(--line); border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 1px 0 #fff inset, 8px 8px 0 rgba(8, 145, 178, 0.08);
+  box-shadow: 0 1px 0 rgba(0, 229, 255, 0.04) inset, 8px 8px 0 rgba(0, 229, 255, 0.08);
 }
 .checks-head { padding: 18px 20px; border-bottom: 1px solid var(--line); }
 .checks-title { font-size: 1.5rem; font-weight: 700; margin-top: 4px; color: var(--ink); letter-spacing: -0.01em; }
@@ -336,7 +349,8 @@ button { font-family: inherit; cursor: pointer; }
 /* ---------- CTA panel ---------- */
 .cta-panel {
   margin-top: 56px; border-radius: 14px; padding: 32px;
-  background: var(--cyan-deep); color: #e0f2fe;
+  background: var(--bg-soft); color: var(--ink-soft);
+  border: 1px solid var(--line);
 }
 @media (min-width: 768px) { .cta-panel { padding: 48px; } }
 
@@ -345,47 +359,57 @@ button { font-family: inherit; cursor: pointer; }
 }
 @media (min-width: 768px) { .cta-grid { grid-template-columns: 7fr 5fr; gap: 40px; } }
 
-.cta-kicker { color: var(--cyan-bright); }
+.cta-kicker { color: var(--cyan); }
 .cta-headline {
-  font-size: 2.25rem; line-height: 1.05; font-weight: 800;
-  letter-spacing: -0.02em; margin: 12px 0 16px; color: #fff;
+  font-family: var(--font-display);
+  font-size: clamp(2.2rem, 5vw, 3.4rem);
+  line-height: 0.98; font-weight: 400;
+  letter-spacing: 0.005em; margin: 14px 0 18px;
+  color: var(--ink);
 }
-@media (min-width: 768px) { .cta-headline { font-size: 2.75rem; } }
 
-.cta-sub { font-size: 1.0625rem; color: #cbe7f0; line-height: 1.6; margin: 0; }
-.cta-sub em { color: #fff; font-style: italic; font-weight: 500; }
+.cta-sub { font-size: 1.0625rem; color: var(--ink-soft); line-height: 1.6; margin: 0; }
+.cta-sub em {
+  font-family: var(--font-italic);
+  color: var(--cyan); font-style: italic; font-weight: 400;
+}
 .cta-list { margin: 20px 0 0; padding: 0; list-style: none; }
 .cta-list li {
   display: flex; gap: 12px; padding: 6px 0;
-  font-size: 15px; color: #cbe7f0;
+  font-size: 15px; color: var(--ink-soft);
 }
-.cta-list li span { color: var(--cyan-bright); font-weight: 700; }
+.cta-list li span { color: var(--cyan); font-weight: 700; }
 
 .cta-card {
-  background: #0b2636; border: 1px solid #164760;
+  background: var(--bg-warm); border: 1px solid var(--line);
   border-radius: 12px; padding: 28px;
 }
 .cta-price-wrap { display: flex; align-items: baseline; gap: 8px; }
 .cta-price {
-  font-size: 3.75rem; font-weight: 800; color: var(--cyan-bright);
-  letter-spacing: -0.03em; line-height: 1;
+  font-family: var(--font-display);
+  font-size: clamp(3rem, 6vw, 4.25rem);
+  font-weight: 400; color: var(--cyan);
+  letter-spacing: 0.005em; line-height: 1;
 }
-.cta-price-note { font-family: var(--font-mono); font-size: 13px; color: #87a8b7; }
+.cta-price-note { font-family: var(--font-mono); font-size: 13px; color: var(--muted); }
 .cta-price-label {
   font-family: var(--font-mono); font-size: 11px; text-transform: uppercase;
-  letter-spacing: 0.12em; color: #87a8b7; margin-top: 4px;
+  letter-spacing: 0.12em; color: var(--muted); margin-top: 4px;
 }
 .cta-btn {
   display: block; text-align: center; margin-top: 24px;
   padding: 14px 20px; border-radius: 8px;
-  background: var(--cyan-bright); color: var(--cyan-deep);
+  background: var(--cyan); color: var(--bg);
   font-weight: 700; font-size: 15px;
   transition: transform .08s ease, background .15s ease;
 }
-.cta-btn:hover { background: #22d3ee; transform: translateY(-1px); }
+.cta-btn:hover {
+  background: var(--cyan); transform: translateY(-1px);
+  box-shadow: 0 8px 24px var(--cyan-glow);
+}
 .cta-fineprint {
   text-align: center; margin-top: 12px;
-  font-family: var(--font-mono); font-size: 11px; color: #87a8b7;
+  font-family: var(--font-mono); font-size: 11px; color: var(--muted);
 }
 
 /* ---------- How it works ---------- */
@@ -398,10 +422,12 @@ button { font-family: inherit; cursor: pointer; }
 @media (min-width: 768px) { .how-grid { grid-template-columns: 4fr 8fr; gap: 48px; } }
 
 .how-headline {
-  font-size: 2.25rem; font-weight: 800; letter-spacing: -0.02em;
-  line-height: 1; margin: 12px 0 0;
+  font-family: var(--font-display);
+  font-size: clamp(2.4rem, 5vw, 3.8rem);
+  font-weight: 400; letter-spacing: 0.005em;
+  line-height: 0.98; margin: 12px 0 0;
+  color: var(--ink);
 }
-@media (min-width: 768px) { .how-headline { font-size: 3rem; } }
 
 .how-step {
   display: flex; gap: 20px; padding-bottom: 22px;
@@ -416,10 +442,12 @@ button { font-family: inherit; cursor: pointer; }
 .faq { padding: 72px 0; }
 @media (min-width: 768px) { .faq { padding: 96px 0; } }
 .faq-headline {
-  font-size: 2.25rem; font-weight: 800; letter-spacing: -0.02em;
-  line-height: 1; margin: 12px 0 40px;
+  font-family: var(--font-display);
+  font-size: clamp(2.4rem, 5vw, 3.8rem);
+  font-weight: 400; letter-spacing: 0.005em;
+  line-height: 0.98; margin: 12px 0 40px;
+  color: var(--ink);
 }
-@media (min-width: 768px) { .faq-headline { font-size: 3rem; } }
 
 .faq-item { padding: 20px 0; border-top: 1px solid var(--line); }
 .faq-item.last { border-bottom: 1px solid var(--line); }
