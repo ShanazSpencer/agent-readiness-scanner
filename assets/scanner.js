@@ -541,11 +541,17 @@ function animateNumber(id, target) {
 /* ---------- Form handling ---------- */
 document.getElementById("scanForm").addEventListener("submit", async (e) => {
   e.preventDefault();
-  let raw = document.getElementById("urlInput").value.trim();
-  if (!raw) return;
+  const input = document.getElementById("urlInput");
+  let raw = input.value.trim();
+  if (!raw) {
+    alert("Please enter your website URL first.");
+    input.focus();
+    return;
+  }
   raw = raw.replace(/^https?:\/\//, "").replace(/\/$/, "");
   if (!raw.includes(".")) {
     alert("That doesn't look like a valid domain.");
+    input.focus();
     return;
   }
   const url = "https://" + raw;
