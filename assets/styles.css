@@ -55,13 +55,13 @@ button { font-family: inherit; cursor: pointer; }
 /* ---------- Typography utilities ---------- */
 .kicker {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 14px;
   text-transform: uppercase;
   letter-spacing: 0.14em;
   color: var(--cyan);
   font-weight: 500;
 }
-.mono-label { font-family: var(--font-mono); font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink-soft); }
+.mono-label { font-family: var(--font-mono); font-size: 15px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink-soft); }
 
 /* ---------- Link underline ---------- */
 .link { position: relative; color: var(--ink-soft); transition: color .15s ease; }
@@ -88,12 +88,12 @@ button { font-family: inherit; cursor: pointer; }
 }
 .brand-dot { color: var(--cyan); }
 .brand-tag {
-  font-family: var(--font-mono); font-size: 10px;
+  font-family: var(--font-mono); font-size: 13px;
   text-transform: uppercase; letter-spacing: 0.1em;
   padding: 3px 8px; border-radius: 999px;
   background: var(--cyan-soft); color: var(--cyan-deep);
 }
-.nav-links { display: none; gap: 28px; font-size: 14px; }
+.nav-links { display: none; gap: 28px; font-size: 16px; }
 @media (min-width: 768px) { .nav-links { display: flex; } }
 
 /* ---------- Hero ---------- */
@@ -137,7 +137,7 @@ button { font-family: inherit; cursor: pointer; }
 
 .hero-stats {
   display: none;
-  font-family: var(--font-mono); font-size: 12px;
+  font-family: var(--font-mono); font-size: 15px;
   text-transform: uppercase; letter-spacing: 0.08em;
   color: var(--muted);
 }
@@ -181,12 +181,12 @@ button { font-family: inherit; cursor: pointer; }
 .url-prefix {
   padding: 0 16px; display: flex; align-items: center;
   background: var(--bg-warm); color: var(--muted);
-  font-family: var(--font-mono); font-size: 13px;
+  font-family: var(--font-mono); font-size: 15px;
   border-right: 1px solid var(--line);
 }
 .url-input-wrap input {
   flex: 1; padding: 14px 16px; border: 0; background: transparent;
-  font-family: var(--font-mono); font-size: 15px; color: var(--ink);
+  font-family: var(--font-mono); font-size: 17px; color: var(--ink);
   outline: none;
 }
 
@@ -207,7 +207,7 @@ button { font-family: inherit; cursor: pointer; }
 
 .scan-meta {
   display: flex; flex-wrap: wrap; gap: 16px;
-  padding: 10px 8px 2px; font-family: var(--font-mono); font-size: 11px;
+  padding: 10px 8px 2px; font-family: var(--font-mono); font-size: 14px;
   color: var(--muted);
 }
 
@@ -229,7 +229,7 @@ button { font-family: inherit; cursor: pointer; }
   animation: blink 1s step-end infinite;
 }
 .target-url { color: var(--cyan-deep); font-weight: 600; }
-.scan-progress { font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+.scan-progress { font-family: var(--font-mono); font-size: 15px; color: var(--muted); }
 
 .scan-sweep-wrap { position: relative; height: 4px; background: var(--bg-warm); overflow: hidden; }
 .scan-sweep {
@@ -239,7 +239,7 @@ button { font-family: inherit; cursor: pointer; }
 }
 
 .scan-log {
-  padding: 20px; font-family: var(--font-mono); font-size: 12px;
+  padding: 20px; font-family: var(--font-mono); font-size: 15px;
   color: var(--ink-soft); min-height: 200px;
   max-height: 320px; overflow-y: auto;
 }
@@ -266,7 +266,7 @@ button { font-family: inherit; cursor: pointer; }
 .verdict-badge {
   display: inline-block; margin-top: 16px;
   padding: 6px 12px; border-radius: 6px;
-  font-family: var(--font-mono); font-size: 11px;
+  font-family: var(--font-mono); font-size: 14px;
   text-transform: uppercase; letter-spacing: 0.1em;
   font-weight: 600;
 }
@@ -278,7 +278,7 @@ button { font-family: inherit; cursor: pointer; }
 }
 @media (min-width: 768px) { .verdict-headline { font-size: 1.875rem; } }
 
-.verdict-sub { font-size: 1rem; color: var(--ink-soft); line-height: 1.6; margin-top: 16px; }
+.verdict-sub { font-size: 1.125rem; color: var(--ink-soft); line-height: 1.6; margin-top: 16px; }
 .verdict-sub-tail { color: var(--muted); font-size: 0.95em; }
 
 /* ---------- Category cards ---------- */
@@ -298,10 +298,10 @@ button { font-family: inherit; cursor: pointer; }
   border-color: var(--cyan-soft);
 }
 .cat-card-head { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 16px; }
-.cat-card-num { font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
-.cat-card-title { font-size: 1.125rem; font-weight: 700; margin-top: 4px; color: var(--ink); letter-spacing: -0.01em; }
-.cat-card-blurb { font-size: 12px; color: var(--muted); margin-top: 2px; }
-.cat-card-meta { font-family: var(--font-mono); font-size: 12px; display: flex; justify-content: space-between; color: var(--ink-soft); }
+.cat-card-num { font-family: var(--font-mono); font-size: 13px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
+.cat-card-title { font-size: 1.3rem; font-weight: 700; margin-top: 4px; color: var(--ink); letter-spacing: -0.01em; }
+.cat-card-blurb { font-size: 15px; color: var(--muted); margin-top: 2px; }
+.cat-card-meta { font-family: var(--font-mono); font-size: 15px; display: flex; justify-content: space-between; color: var(--ink-soft); }
 
 .ring-bg { stroke: var(--line); }
 .ring-fg { stroke: var(--cyan); transition: stroke-dashoffset 1.6s cubic-bezier(.3,.7,.3,1); }
@@ -316,7 +316,7 @@ button { font-family: inherit; cursor: pointer; }
 .checks-title { font-size: 1.5rem; font-weight: 700; margin-top: 4px; color: var(--ink); letter-spacing: -0.01em; }
 
 .check-cat-header {
-  padding: 10px 20px; font-family: var(--font-mono); font-size: 10px;
+  padding: 10px 20px; font-family: var(--font-mono); font-size: 13px;
   text-transform: uppercase; letter-spacing: 0.12em;
   background: var(--bg-warm); color: var(--cyan-deep); font-weight: 600;
   border-top: 1px solid var(--line);
@@ -340,16 +340,16 @@ button { font-family: inherit; cursor: pointer; }
 .dot-warn    { background: var(--amber); }
 .dot-unknown { background: var(--muted); }
 
-.check-label { font-weight: 600; font-size: 15px; color: var(--ink); }
-.check-hint  { font-size: 12px; color: var(--muted); margin-top: 3px; }
-.check-detail { font-size: 14px; color: var(--ink-soft); margin-top: 10px; line-height: 1.5; }
+.check-label { font-weight: 600; font-size: 17px; color: var(--ink); }
+.check-hint  { font-size: 15px; color: var(--muted); margin-top: 3px; }
+.check-detail { font-size: 16px; color: var(--ink-soft); margin-top: 10px; line-height: 1.5; }
 
 .check-state {
   text-align: right; font-family: var(--font-mono);
-  font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em;
+  font-size: 14px; text-transform: uppercase; letter-spacing: 0.1em;
   font-weight: 600;
 }
-.check-points { font-family: var(--font-mono); font-size: 11px; color: var(--muted); margin-top: 4px; }
+.check-points { font-family: var(--font-mono); font-size: 14px; color: var(--muted); margin-top: 4px; }
 
 /* ---------- CTA panel ---------- */
 .cta-panel {
@@ -373,7 +373,7 @@ button { font-family: inherit; cursor: pointer; }
   color: var(--ink);
 }
 
-.cta-sub { font-size: 1.0625rem; color: var(--ink-soft); line-height: 1.6; margin: 0; }
+.cta-sub { font-size: 1.2rem; color: var(--ink-soft); line-height: 1.6; margin: 0; }
 .cta-sub em {
   font-family: var(--font-italic);
   color: var(--cyan); font-style: italic; font-weight: 400;
@@ -381,7 +381,7 @@ button { font-family: inherit; cursor: pointer; }
 .cta-list { margin: 20px 0 0; padding: 0; list-style: none; }
 .cta-list li {
   display: flex; gap: 12px; padding: 6px 0;
-  font-size: 15px; color: var(--ink-soft);
+  font-size: 17px; color: var(--ink-soft);
 }
 .cta-list li span { color: var(--cyan); font-weight: 700; }
 
@@ -396,9 +396,9 @@ button { font-family: inherit; cursor: pointer; }
   font-weight: 400; color: var(--cyan);
   letter-spacing: 0.005em; line-height: 1;
 }
-.cta-price-note { font-family: var(--font-mono); font-size: 13px; color: var(--muted); }
+.cta-price-note { font-family: var(--font-mono); font-size: 15px; color: var(--muted); }
 .cta-price-label {
-  font-family: var(--font-mono); font-size: 11px; text-transform: uppercase;
+  font-family: var(--font-mono); font-size: 14px; text-transform: uppercase;
   letter-spacing: 0.12em; color: var(--muted); margin-top: 4px;
 }
 .cta-btn {
@@ -415,7 +415,7 @@ button { font-family: inherit; cursor: pointer; }
 }
 .cta-fineprint {
   text-align: center; margin-top: 12px;
-  font-family: var(--font-mono); font-size: 11px; color: var(--muted);
+  font-family: var(--font-mono); font-size: 14px; color: var(--muted);
 }
 
 /* ---------- How it works ---------- */
@@ -440,9 +440,9 @@ button { font-family: inherit; cursor: pointer; }
   border-bottom: 1px solid var(--line); margin-bottom: 22px;
 }
 .how-step.last { border-bottom: 0; padding-bottom: 0; margin-bottom: 0; }
-.how-num { font-family: var(--font-mono); font-size: 14px; color: var(--cyan); padding-top: 3px; font-weight: 500; }
+.how-num { font-family: var(--font-mono); font-size: 16px; color: var(--cyan); padding-top: 3px; font-weight: 500; }
 .how-step-title { font-size: 1.375rem; font-weight: 700; color: var(--ink); margin-bottom: 4px; letter-spacing: -0.01em; }
-.how-step-sub { font-size: 15px; color: var(--ink-soft); line-height: 1.55; }
+.how-step-sub { font-size: 17px; color: var(--ink-soft); line-height: 1.55; }
 
 /* ---------- FAQ ---------- */
 .faq { padding: 72px 0; }
@@ -467,7 +467,7 @@ button { font-family: inherit; cursor: pointer; }
 }
 .chev { font-family: var(--font-mono); color: var(--cyan); font-size: 22px; transition: transform .15s ease; }
 .faq-item[open] .chev { transform: rotate(90deg); }
-.faq-body { margin-top: 14px; font-size: 15px; color: var(--ink-soft); line-height: 1.65; }
+.faq-body { margin-top: 14px; font-size: 17px; color: var(--ink-soft); line-height: 1.65; }
 
 /* ---------- Footer ---------- */
 .site-footer { border-top: 1px solid var(--line); background: var(--bg-soft); padding: 32px 0; }
@@ -478,10 +478,10 @@ button { font-family: inherit; cursor: pointer; }
 @media (min-width: 768px) {
   .foot { flex-direction: row; align-items: center; justify-content: space-between; }
 }
-.foot-brand { font-size: 15px; }
+.foot-brand { font-size: 17px; }
 .foot-links {
   display: flex; flex-wrap: wrap; gap: 20px;
-  font-family: var(--font-mono); font-size: 11px;
+  font-family: var(--font-mono); font-size: 14px;
   color: var(--muted);
 }
 
