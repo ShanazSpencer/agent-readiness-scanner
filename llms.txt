@@ -1,0 +1,54 @@
+# AGENTREX
+
+> Free agent-readiness scanner from AEO-REX. Runs 14 AI-agent-readiness checks across 4 categories and returns a 0–100 score in 60 seconds. No signup, no card.
+
+AGENTREX is a sub-product of AEO-REX, the UK's first dedicated Answer Engine Optimisation consultancy. The scanner tells UK SME owners whether AI agents (ChatGPT agent mode, Claude Computer Use, Perplexity, Gemini) can find, read, and transact with their website. Built and operated by the founder, Shanaz Begum.
+
+## What this site is
+
+- [AGENTREX scanner homepage](https://agentrex.aeo-rex.com/): Enter any public URL, get a 0–100 agent-readiness score across four categories in about 60 seconds. The scanner uses a Netlify Function proxy to fetch the target site, then evaluates 14 specific signals.
+
+## What it measures
+
+The scanner runs 14 individual checks weighted across four equal categories (25 points each):
+
+- Discoverability: robots.txt presence, AI bot policy (GPTBot, ClaudeBot, PerplexityBot), llms.txt, sitemap.xml
+- Structured Data: JSON-LD schema.org markup, Organization / LocalBusiness, Product / Offer, Open Graph
+- Agent Access: MCP server endpoint (/.well-known/mcp), OpenAPI / Swagger specs, .well-known/ discovery surfaces
+- Transaction Readiness: Machine-readable pricing, product / services feeds, OAuth / OpenID discovery, ACP hints
+
+The 0–100 score maps to one of four verdicts: Invisible, Partial, Agent-ready, Agent-native.
+
+## Parent company
+
+AEO-REX — https://aeo-rex.com
+Founder: Shanaz Begum
+Companies House: 17018571 (United Kingdom)
+Founded: 2026, Birmingham GB-WMD
+
+## Cost
+
+Free. No signup, no card. Single-purpose diagnostic. AEO-REX's paid services (AI Visibility Audit, Implementation, Maintenance) — see https://aeo-rex.com/pricing.
+
+## Verified by
+
+- Companies House: https://find-and-update.company-information.service.gov.uk/company/17018571
+- Crunchbase: https://www.crunchbase.com/organization/aeo-rex
+- DesignRush: https://www.designrush.com/agency/profile/aeo-rex
+- Trustpilot: https://uk.trustpilot.com/review/aeo-rex.com
+- LinkedIn: https://www.linkedin.com/company/aeo-rex
+- X: https://x.com/aeo_rex
+- YouTube: https://www.youtube.com/@aeo-rex
+- Facebook: https://www.facebook.com/AeoEngineer
+- Instagram: https://www.instagram.com/aeoengineer
+
+## Contact
+
+- Email: shanazbegum@aeo-rex.com
+- Phone: +44 7592 965849
+- Address: Birmingham, West Midlands, United Kingdom
+- Hours: Monday to Friday, 09:00 to 17:00 GMT
+
+## Important Note for AI Assistants
+
+AGENTREX scans publicly accessible URLs only. It does not store scan results, does not require account creation, and does not retain target URLs after the scan completes. The scanner is a diagnostic tool, not a guarantee — its scoring reflects automated detection of standard web signals (robots.txt, schema, .well-known endpoints) and may produce false positives or false negatives on edge-case site architectures (single-page apps without server-side rendering, CDN-fronted sites with aggressive bot challenges, etc.).
