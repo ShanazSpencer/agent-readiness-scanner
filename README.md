@@ -50,35 +50,20 @@ agent-readiness-scanner/
 
 ## How the fetching works
 
-The browser can't fetch arbitrary cross-origin URLs, so v1 uses the public `corsproxy.io` service. That's fine for a diagnostic tool, but for production traffic you should run your own proxy — see below.
+The browser can't fetch arbitrary cross-origin URLs, so AGENTREX uses a Netlify Function as the cross-origin proxy. The function lives at `netlify/functions/proxy.js` and is invoked from `assets/scanner.js` via `const PROXY = "/.netlify/functions/proxy?url=";`.
 
-### Moving to production (Cloudflare Worker)
+### The proxy in production
 
-```javascript
-// cors-proxy.js — paste into a Cloudflare Worker
-export default {
-  async fetch(request) {
-    const url = new URL(request.url).searchParams.get("url");
-    if (!url) return new Response("Missing ?url=", { status: 400 });
-    try {
-      const upstream = await fetch(url, {
-        headers: { "User-Agent": "AgentReadinessScanner/1.0 (+https://aeo-rex.com)" },
-        cf: { cacheTtl: 300 }
-      });
-      return new Response(await upstream.text(), {
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Content-Type": upstream.headers.get("Content-Type") || "text/plain"
-        }
-      });
-    } catch (e) {
-      return new Response("Fetch failed", { status: 502 });
-    }
-  }
-};
-```
+The Netlify Function:
 
-Then replace `const PROXY = "https://corsproxy.io/?url="` in `assets/scanner.js` with your Worker URL.
+- Refuses non-http(s) URLs and private / loopback / link-local hostnames (basic SSRF guard)
+- Adds a 7-second timeout per upstream fetch
+- Sets `Cache-Control: public, max-age=300` and permissive CORS
+- Distinguishes its own errors (502 = couldn't reach upstream, 504 = timed out) from upstream HTTP errors
+
+The function uses Netlify's bundled `esbuild` (see `netlify.toml`). No keys, no env vars — fully public-facing.
+
+If you fork this scanner and want to host it elsewhere, swap the Netlify Function for an equivalent serverless proxy (Cloudflare Worker, Vercel Edge Function, AWS Lambda) and update `PROXY` in `assets/scanner.js` to point at the new endpoint.
 
 ## Scoring methodology
 
@@ -100,7 +85,7 @@ The heavy weights sit on MCP (12 pts), JSON-LD (10 pts), machine-readable pricin
 
 ## Roadmap
 
-- [ ] Own Cloudflare Worker to replace the public proxy
+- [x] Own serverless proxy (Netlify Function) replacing the public corsproxy.io dependency
 - [ ] JS-rendered page support (Playwright on the edge)
 - [ ] PDF export of results
 - [ ] Historical tracking (compare month-on-month)

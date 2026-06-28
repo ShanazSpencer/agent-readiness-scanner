@@ -364,6 +364,12 @@ button { font-family: inherit; cursor: pointer; }
   transition: background .12s ease;
 }
 .check-row:hover { background: var(--bg-warm); }
+/* On narrow phones (e.g. iPhone SE 375px), stack the right-hand verdict
+   column below the dot+text so the middle text column gets full width. */
+@media (max-width: 480px) {
+  .check-row { grid-template-columns: auto 1fr; padding: 14px 16px; }
+  .check-row > :nth-child(3) { grid-column: 1 / -1; padding-left: 26px; margin-top: 4px; }
+}
 
 .check-dot {
   width: 10px; height: 10px; border-radius: 50%; margin-top: 7px;

@@ -96,6 +96,45 @@ function proxyErrorDetail(reason, what) {
   return `Couldn't ${what} — ${phrase}.`;
 }
 
+/* ---------- JSON-LD helpers: walk the parsed object tree ----------
+   The old approach grepped the raw HTML for "@type": "Organization" and
+   "price" strings. That gave ~15-25% false positives (matched any string
+   containing the word "price") and missed array @type values like
+   ["Organization","Corporation"]. These helpers parse properly and walk. */
+function walkJsonLd(node, visitor) {
+  if (Array.isArray(node)) {
+    for (const item of node) walkJsonLd(item, visitor);
+    return;
+  }
+  if (node && typeof node === "object") {
+    visitor(node);
+    for (const k of Object.keys(node)) walkJsonLd(node[k], visitor);
+  }
+}
+function collectTypes(parsedBlocks) {
+  const types = new Set();
+  for (const b of parsedBlocks) {
+    walkJsonLd(b, (obj) => {
+      const t = obj["@type"];
+      if (typeof t === "string") types.add(t.toLowerCase());
+      else if (Array.isArray(t)) t.forEach(x => typeof x === "string" && types.add(x.toLowerCase()));
+    });
+  }
+  return types;
+}
+function hasPriceKey(parsedBlocks) {
+  let found = false;
+  const priceKeys = new Set(["price","pricespecification","priceamount","pricecurrency"]);
+  for (const b of parsedBlocks) {
+    walkJsonLd(b, (obj) => {
+      for (const k of Object.keys(obj)) {
+        if (priceKeys.has(k.toLowerCase())) found = true;
+      }
+    });
+  }
+  return found;
+}
+
 /* ---------- Individual checks ---------- */
 async function checkRobots(base) {
   const r = await safeFetch(base + "/robots.txt");
@@ -136,6 +175,7 @@ async function checkLLMSTxt(base) {
 }
 
 async function checkSitemap(base) {
+  // Try canonical /sitemap.xml first
   const r = await safeFetch(base + "/sitemap.xml");
   if (isProxyError(r.reason)) {
     return { state: "unknown", detail: proxyErrorDetail(r.reason, "fetch /sitemap.xml") };
@@ -144,7 +184,29 @@ async function checkSitemap(base) {
     const urls = (r.text.match(/<loc>/g) || []).length;
     return { state: "pass", detail: `sitemap.xml found (${urls} entries).` };
   }
-  return { state: "fail", detail: "No sitemap.xml — agents can't enumerate your pages." };
+
+  // WordPress / Yoast / RankMath fallback: /sitemap_index.xml
+  const wp = await safeFetch(base + "/sitemap_index.xml");
+  if (wp.ok && /<urlset|<sitemapindex/i.test(wp.text)) {
+    const urls = (wp.text.match(/<loc>/g) || []).length;
+    return { state: "pass", detail: `sitemap_index.xml found (${urls} entries) — WordPress / Yoast / RankMath style.` };
+  }
+
+  // Last-ditch: read Sitemap: directive from robots.txt
+  const robots = await safeFetch(base + "/robots.txt");
+  if (robots.ok && robots.text) {
+    const m = robots.text.match(/^\s*Sitemap:\s*(\S+)/im);
+    if (m && m[1]) {
+      const sitemapUrl = m[1].trim();
+      const sm = await safeFetch(sitemapUrl);
+      if (sm.ok && /<urlset|<sitemapindex/i.test(sm.text)) {
+        const urls = (sm.text.match(/<loc>/g) || []).length;
+        return { state: "pass", detail: `Sitemap found via robots.txt Sitemap: directive (${urls} entries at ${sitemapUrl}).` };
+      }
+    }
+  }
+
+  return { state: "fail", detail: "No sitemap.xml, /sitemap_index.xml, or Sitemap: directive in robots.txt — agents can't enumerate your pages." };
 }
 
 async function checkHomepage(base) {
@@ -172,20 +234,40 @@ async function checkHomepage(base) {
   if (!r.ok || !r.text) return { out, raw: "" };
   const html = r.text;
 
-  // JSON-LD
-  const ldMatches = html.match(/<script[^>]+application\/ld\+json[^>]*>([\s\S]*?)<\/script>/gi) || [];
-  if (ldMatches.length > 0) {
-    out.jsonld = { state: "pass", detail: `${ldMatches.length} JSON-LD block(s) detected.` };
-    const blob = ldMatches.join(" ").toLowerCase();
-    if (/"@type"\s*:\s*"(organization|localbusiness|corporation|store)"/i.test(blob)) {
+  // JSON-LD — parse with DOMParser, walk parsed object tree.
+  // Old regex approach had ~15-25% false positives on "price" and missed
+  // array @type values like ["Organization","Corporation"].
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, "text/html");
+  const ldScripts = doc.querySelectorAll('script[type="application/ld+json"]');
+  const parsedBlocks = [];
+  let parseFailures = 0;
+  ldScripts.forEach((s) => {
+    try { parsedBlocks.push(JSON.parse(s.textContent)); }
+    catch (e) { parseFailures++; }
+  });
+
+  if (ldScripts.length === 0) {
+    out.jsonld = { state: "fail", detail: "No JSON-LD <script> tags found on homepage." };
+  } else if (parsedBlocks.length === 0) {
+    out.jsonld = { state: "warn", detail: `${ldScripts.length} JSON-LD block(s) found but all failed to parse — malformed.` };
+  } else {
+    let detail = `${parsedBlocks.length} valid JSON-LD block(s) detected`;
+    if (parseFailures > 0) detail += ` (${parseFailures} block(s) failed to parse)`;
+    out.jsonld = { state: "pass", detail: detail + "." };
+
+    const types = collectTypes(parsedBlocks);
+    const orgTypes = ["organization","localbusiness","corporation","store","professionalservice"];
+    if (orgTypes.some(t => types.has(t))) {
       out.orgschema = { state: "pass", detail: "Organization-type entity declared." };
     } else {
       out.orgschema = { state: "warn", detail: "Schema present but no Organization / LocalBusiness @type." };
     }
-    if (/"@type"\s*:\s*"(product|offer|service)"/i.test(blob)) {
+    const productTypes = ["product","offer","service","softwareapplication"];
+    if (productTypes.some(t => types.has(t))) {
       out.productsch = { state: "pass", detail: "Product / Offer / Service schema found." };
     }
-    if (/"price"|"pricespecification"|"priceamount"|"pricecurrency"/i.test(blob)) {
+    if (hasPriceKey(parsedBlocks)) {
       out.pricing = { state: "pass", detail: "Price markup found inside structured data." };
     }
   }

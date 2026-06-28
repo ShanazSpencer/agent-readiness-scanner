@@ -54,7 +54,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;700;900&family=DM+Serif+Display:ital@0;1&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
-  <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="assets/styles.css" />
 </head>
 <body>
@@ -130,7 +129,7 @@
           <span id="scanProgress" class="scan-progress">0 / 14</span>
         </div>
         <div class="scan-sweep-wrap"><div class="scan-sweep"></div></div>
-        <div id="scanLog" class="scan-log"></div>
+        <div id="scanLog" class="scan-log" aria-live="polite" aria-atomic="false"></div>
       </div>
     </div>
   </section>

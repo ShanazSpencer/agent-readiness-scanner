@@ -12,13 +12,16 @@
              for OUR errors — distinct from upstream's status
    ===================================================== */
 
+import dns from "node:dns/promises";
+
 const TIMEOUT_MS = 8000;
 const USER_AGENT = "AgentReadinessScanner/1.0 (+https://aeo-rex.com)";
 
-/* SSRF guard: hostnames + IPv4/IPv6 ranges we refuse to fetch.
-   String-based — good enough for a free public scanner.
-   Hardening with DNS resolution is in TODO.md; abuse will
-   appear in [ssrf-block] console logs first. */
+/* SSRF guard, two layers:
+   1. Hostname string match (fast — catches "localhost", literal IPs, *.local, etc).
+   2. DNS resolution of every other hostname, then check each resolved IP against
+      the same private-range blocklist. Defeats DNS rebinding (attacker registers
+      a public hostname like evil.example.com that resolves to 10.0.0.1). */
 const BLOCKED_HOST_PATTERNS = [
   /^localhost$/i,
   /\.local$/i,
@@ -44,6 +47,44 @@ function is172Private(host) {
 
 function isBlockedHost(host) {
   return BLOCKED_HOST_PATTERNS.some(re => re.test(host)) || is172Private(host);
+}
+
+/* Layer 2 — IP-level checks applied after DNS lookup. */
+function isPrivateIPv4(ip) {
+  const m = ip.match(/^(\d+)\.(\d+)\.(\d+)\.(\d+)$/);
+  if (!m) return false;
+  const [a, b] = m.slice(1).map(Number);
+  if (a === 127) return true;                     // 127.0.0.0/8 loopback
+  if (a === 10) return true;                      // 10.0.0.0/8 private
+  if (a === 172 && b >= 16 && b <= 31) return true;  // 172.16.0.0/12 private
+  if (a === 192 && b === 168) return true;        // 192.168.0.0/16 private
+  if (a === 169 && b === 254) return true;        // 169.254.0.0/16 link-local (incl. AWS metadata)
+  if (a === 100 && b >= 64 && b <= 127) return true; // 100.64.0.0/10 carrier-grade NAT
+  if (a === 0) return true;                       // 0.0.0.0/8
+  return false;
+}
+function isPrivateIPv6(ip) {
+  const s = ip.toLowerCase();
+  if (s === "::1") return true;
+  if (/^fc[0-9a-f]*:/.test(s)) return true;       // fc00::/7 ULA
+  if (/^fd[0-9a-f]*:/.test(s)) return true;
+  if (/^fe[89ab][0-9a-f]*:/.test(s)) return true; // fe80::/10 link-local
+  return false;
+}
+async function resolveAndBlockPrivate(hostname) {
+  try {
+    const addrs = await dns.lookup(hostname, { all: true });
+    for (const a of addrs) {
+      const privateHit = a.family === 6 ? isPrivateIPv6(a.address) : isPrivateIPv4(a.address);
+      if (privateHit) {
+        return { blocked: true, reason: `resolves to private IP ${a.address}` };
+      }
+    }
+    return { blocked: false };
+  } catch (e) {
+    // DNS failure — block to be safe (legit public hostnames should resolve)
+    return { blocked: true, reason: `DNS lookup failed: ${e.message}` };
+  }
 }
 
 const corsHeaders = {
@@ -79,9 +120,17 @@ export default async (req) => {
     return jsonError(400, `Protocol ${parsed.protocol} not allowed; use http or https.`);
   }
 
+  // Layer 1: fast string-based hostname check
   if (isBlockedHost(parsed.hostname)) {
-    console.log(`[ssrf-block] ${new Date().toISOString()} ${target}`);
+    console.log(`[ssrf-block-string] ${new Date().toISOString()} ${target}`);
     return jsonError(400, "Private/internal hostnames are not proxied.");
+  }
+
+  // Layer 2: DNS resolution + per-IP private-range check (defeats DNS rebinding)
+  const dnsCheck = await resolveAndBlockPrivate(parsed.hostname);
+  if (dnsCheck.blocked) {
+    console.log(`[ssrf-block-dns] ${new Date().toISOString()} ${target} — ${dnsCheck.reason}`);
+    return jsonError(400, `Hostname cannot be proxied (${dnsCheck.reason}).`);
   }
 
   const ctrl = new AbortController();
