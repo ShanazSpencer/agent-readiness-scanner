@@ -293,7 +293,7 @@ async function checkMCP(base) {
   if (sawProxyError) {
     return { state: "unknown", detail: "Couldn't probe MCP endpoints — proxy error on one or more paths." };
   }
-  return { state: "fail", detail: "No MCP endpoint detected. Fewer than 1% of UK sites have this — early-mover territory." };
+  return { state: "fail", detail: "No MCP endpoint detected. Few sites have one yet, so this is early-mover territory." };
 }
 
 async function checkOpenAPI(base) {
@@ -575,13 +575,13 @@ function verdictFor(score) {
   if (score >= 80) return {
     badge: "Agent-native",
     bg: "#d1fae5", fg: "#065f46",
-    headline: "You're in the top 1% — genuinely agent-native.",
+    headline: "Genuinely agent-native.",
     sub: "Most businesses won't reach this level for 18–24 months. Lock in your lead with monitoring and keep shipping."
   };
   if (score >= 60) return {
     badge: "Agent-ready",
     bg: "#cffafe", fg: "#083344",
-    headline: "Ahead of ~95% of UK sites — solid foundation.",
+    headline: "A solid foundation.",
     sub: "You've covered the basics. The gap to agent-native is mostly infrastructure work: MCP, machine-readable feeds, agent auth."
   };
   if (score >= 30) return {
@@ -594,7 +594,7 @@ function verdictFor(score) {
     badge: "Invisible",
     bg: "#fecaca", fg: "#991b1b",
     headline: "Right now, to an agent, you essentially don't exist.",
-    sub: "That's not a failing — it's where ~70% of UK SMEs are. The upside is quick wins are genuinely quick. Start with the red rows below."
+    sub: "That's not a failing. Many UK SMEs start here. The upside is quick wins are genuinely quick. Start with the red rows below."
   };
 }
 

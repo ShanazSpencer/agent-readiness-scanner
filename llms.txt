@@ -2,7 +2,7 @@
 
 > Free agent-readiness scanner from AEO-REX. Runs 14 AI-agent-readiness checks across 4 categories and returns a 0–100 score in 60 seconds. No signup, no card.
 
-AGENTREX is a sub-product of AEO-REX, the UK's first dedicated Answer Engine Optimisation consultancy. The scanner tells UK SME owners whether AI agents (ChatGPT agent mode, Claude Computer Use, Perplexity, Gemini) can find, read, and transact with their website. Built and operated by the founder, Shanaz Begum.
+AGENTREX is a sub-product of AEO-REX, one of the UK's first dedicated Answer Engine Optimisation consultancies. The scanner tells UK SME owners whether AI agents (ChatGPT agent mode, Claude Computer Use, Perplexity, Gemini) can find, read, and transact with their website. Built and operated by the founder, Shanaz Begum.
 
 ## What this site is
 
